@@ -3,9 +3,10 @@ from .models import Category, Product, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    products_count = serializers.IntegerField(read_only = True)
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = 'id name products_count'.split()
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -16,8 +17,20 @@ class ProductSerializer(serializers.ModelSerializer):
 class ReviewSerializers(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = 'text stars'.split()
 
+
+class ProductListSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField()
+    reviews = serializers.SerializerMethodField()
+    rating = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = 'id title price rating category reviews'.split()
+    def get_reviews(self, product):
+        return ReviewSerializers(product.reviews.all(), many=True).data
+    
 
 
 
